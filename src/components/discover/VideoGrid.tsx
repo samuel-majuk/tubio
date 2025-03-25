@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import VideoCard from "./VideoCard";
+import VideoSkeleton from "@/components/ui/video-skeleton";
 import { cn } from "@/lib/utils";
 import { Loader2, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -93,6 +94,37 @@ const VideoGrid = ({
     onVideoSave(videoId);
   };
 
+  // Show skeletons when loading initially
+  if (isLoading && filteredVideos.length === 0) {
+    return (
+      <div className="w-full bg-gray-50 dark:bg-gray-900 min-h-[500px] p-4">
+        <div
+          className={cn(
+            "w-full gap-6",
+            layout === "grid"
+              ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+              : "flex flex-col",
+          )}
+        >
+          {Array(8)
+            .fill(0)
+            .map((_, index) => (
+              <div
+                key={`skeleton-${index}`}
+                className={cn(
+                  "transition-all duration-200",
+                  layout === "list" && "w-full",
+                )}
+              >
+                <VideoSkeleton />
+              </div>
+            ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Show empty state when no videos and not loading
   if (filteredVideos.length === 0 && !isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-96 bg-gray-50 dark:bg-gray-900 rounded-lg">
@@ -105,6 +137,16 @@ const VideoGrid = ({
             ? `No videos found in the ${selectedNiche} category. Try selecting a different category.`
             : "No videos match your current filters. Try adjusting your filter settings."}
         </p>
+        <Button
+          variant="outline"
+          className="mt-4"
+          onClick={() => {
+            // Show mock data if real data fails to load
+            setVideos(mockVideos);
+          }}
+        >
+          Show sample videos
+        </Button>
       </div>
     );
   }
